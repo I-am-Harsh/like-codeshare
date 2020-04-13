@@ -11,23 +11,24 @@ randomURL
             res.json(result);
         }
         else{
-            res.json({empty : true});
+            res.json(result);
         }
     })
     .catch(err => res.json(err))
 })
 
 .post('/:url', (req, res) => {
+    console.log(req.body.text);
     Data.create({url : req.params.url, text : req.body.text})
     .then(result =>  {
         console.log(result);
-        console.log("created");
         res.json({success : true});
     })
-    .catch(err => res.json(err));
+    .catch(err => res.json({success : false}));
 })
 
 .put('/:url', (req,res) => {
+    console.log("Put req text :",req.body.text);
     Data.findOneAndUpdate({url : req.params.url}, {text : req.body.text})
     .then(result => res.json({success : true}))
     .catch(err => res.json(err))

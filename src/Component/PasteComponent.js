@@ -14,52 +14,65 @@ class PasteComponent extends Component {
         }
     }
 
-    componentDidMount(){
+    getData = async () => {
+        console.log("called");
         var url = window.location.href
         url = url.split('paste/');
-        axios.get('http://localhost:9000/paste/' + url[1])
+        await axios.get('http://localhost:9000/paste/' + url[1])
         .then(result => {
-            if(result.data.empty === undefined || result.data.empty === false){
-                console.log(result.data);
+            if(result.data.length >= 1){
                 this.setState({
                     text : result.data[0].text,
                     alreadyExist : true
                 })
                 console.log(this.state);
             }
+            else{
+                console.log("DNE");
+            }
         })
         .catch(err => alert(err))
     }
 
-    submit = (e) => {
-        e.preventDefault();
+    async componentDidMount(){
+        await this.getData();
+        setInterval(this.getData, 5000);
+    }
+
+    submit = async (value) => {
+        // e.preventDefault();
         var url = window.location.href
         url = url.split('paste/');
-        console.log(e.target.text.value);
+
         if(!this.state.alreadyExist){
-            axios.post("http://localhost:9000/paste/" + url[1], {
-                text : e.target.text.value
+            this.setState({
+                alreadyExist : true
+            })
+            console.log("Value being sent : ",value)
+            await axios.post("http://localhost:9000/paste/" + url[1], {
+                text : value,
             })
             .then(result => {
                 if(result.data.success){
                     this.setState({
-                        text : result.data.text
+                        text : result.data.text,
                     })
-                    console.log("result: ",result);
                 }
                 else{
-                    console.log(result);
+                    this.setState({
+                        alreadyExist : false
+                    })
                 }
             })
             .catch(err => alert(err))
         }
         else{
-            axios.put("http://localhost:9000/paste/" + url[1], {
-                text : e.target.text.value
+            await axios.put("http://localhost:9000/paste/" + url[1], {
+                text : value
             })
             .then(result => {
                 if(result.data.success){
-                    alert("updated")
+                    console.log("Updated");
                 }
                 else{
                     alert("Somnething went wrong");
@@ -68,6 +81,16 @@ class PasteComponent extends Component {
             .catch(err => alert(err))
         }
     }
+
+    handleChange = (e) => {
+        console.log(e.target.value);
+        this.setState({
+            text : e.target.value
+        })
+        // console.log("State : ", this.state.text);
+        this.submit(e.target.value);
+    }
+
 
     newLink = () => {
         console.log('random string called');
@@ -80,14 +103,18 @@ class PasteComponent extends Component {
             newLink : true,
             newUrl : fullPath
         })
-        
+    }
+
+    lmao = () =>{
+        this.setState({
+            newLink : false
+        })
+
     }
     
     render(){
         if(this.state.newLink){            
-            this.setState({
-                newLink : false
-            })
+            this.lmao();
             return(
                 <Redirect to ={this.state.newUrl}/>
             );
@@ -98,11 +125,13 @@ class PasteComponent extends Component {
                 Place your text here
                 <Form onSubmit={this.submit}>
                     <FormGroup>
-                        <Input type='textarea' defaultValue={this.state.text} name='text' id='text'></Input>
+                        <Input type='textarea'
+                            value={this.state.text} onChange={e => this.handleChange(e)} name='text'>
+                        </Input>
                     </FormGroup>
-                    <FormGroup>
+                    {/* <FormGroup>
                         <Button outline color='success' type='submit'>Share</Button>
-                    </FormGroup>
+                    </FormGroup> */}
                     <FormGroup>
                         <Button outline color='danger' type='button' onClick={this.newLink}>Find another link</Button>
                     </FormGroup>
