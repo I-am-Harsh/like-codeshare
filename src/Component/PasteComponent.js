@@ -15,10 +15,10 @@ class PasteComponent extends Component {
     }
 
     getData = async () => {
-        console.log("called");
         var url = window.location.href
         url = url.split('paste/');
-        await axios.get('http://localhost:9000/paste/' + url[1])
+        console.log(window.location.hostname);
+        await axios.get("http://" + window.location.hostname + ":9000/paste/" + url[1])
         .then(result => {
             if(result.data.length >= 1){
                 this.setState({
@@ -31,7 +31,7 @@ class PasteComponent extends Component {
                 console.log("DNE");
             }
         })
-        .catch(err => alert(err))
+        .catch(err => console.log(err))
     }
 
     async componentDidMount(){
@@ -49,7 +49,7 @@ class PasteComponent extends Component {
                 alreadyExist : true
             })
             console.log("Value being sent : ",value)
-            await axios.post("http://localhost:9000/paste/" + url[1], {
+            await axios.post("http://" + window.location.hostname + ":9000/paste/" + url[1], {
                 text : value,
             })
             .then(result => {
@@ -64,10 +64,10 @@ class PasteComponent extends Component {
                     })
                 }
             })
-            .catch(err => alert(err))
+            .catch(err => console.log(err))
         }
         else{
-            await axios.put("http://localhost:9000/paste/" + url[1], {
+            await axios.put("http://" + window.location.hostname + ":9000/paste/" + url[1], {
                 text : value
             })
             .then(result => {
@@ -75,10 +75,10 @@ class PasteComponent extends Component {
                     console.log("Updated");
                 }
                 else{
-                    alert("Somnething went wrong");
+                    console.log("Somnething went wrong");
                 }
             })
-            .catch(err => alert(err))
+            .catch(err => console.log(err))
         }
     }
 
@@ -109,12 +109,14 @@ class PasteComponent extends Component {
         this.setState({
             newLink : false
         })
+        // window.location.assign("http://localhost:3000/paste"/+this.state.newUrl)
 
     }
-    
+
     render(){
         if(this.state.newLink){            
             this.lmao();
+            // window.location.assign("http://localhost:3000/paste"/+this.state.newUrl)
             return(
                 <Redirect to ={this.state.newUrl}/>
             );
